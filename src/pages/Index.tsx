@@ -90,7 +90,7 @@ const Index = () => {
             </Badge>
             <h1 className="text-4xl lg:text-6xl font-bold text-foreground mb-6 animate-fade-in">
               Transformez l'apprentissage avec 
-              <span className="bg-gradient-primary bg-clip-text text-transparent"> EduPlatform</span>
+              <span className="bg-gradient-primary bg-clip-text text-transparent"> Kaay Diangu</span>
             </h1>
             <p className="text-xl text-muted-foreground mb-8 animate-slide-up">
               Solution complète de e-learning avec gestion avancée des utilisateurs, 
