@@ -15,6 +15,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   fonctions,
   profils,
@@ -79,6 +81,131 @@ export default function AdminDashboard() {
   const [themeFilter, setThemeFilter] = useState("");
   const [sousThemeFilter, setSousThemeFilter] = useState("");
   const [sectionFilter, setSectionFilter] = useState("");
+
+  // Simple parameter tables local state (front-only)
+  const [fonctionsItems, setFonctionsItems] = useState(() => [...fonctions]);
+  const [profilsItems, setProfilsItems] = useState(() => [...profils]);
+  const [statutsItems, setStatutsItems] = useState(() => [...statutsContenu]);
+  const [typesQuizItems, setTypesQuizItems] = useState(() => [...typesQuiz]);
+  const [modesPaiementItems, setModesPaiementItems] = useState(() => [...modesPaiement]);
+  const [typesRessourceItems, setTypesRessourceItems] = useState(() => [...typesRessourcePedagogique]);
+  const [ecolesSimpleItems, setEcolesSimpleItems] = useState(() => ecoles.map((e:any) => ({ code: e.code, libelle: e.nom, ordre: e.ordre })));
+  const [uvsSimpleItems, setUvsSimpleItems] = useState(() => uvs.map((u:any) => ({ code: u.code, libelle: u.libelle, ordre: u.ordre })));
+  const [uvDetailsItems, setUvDetailsItems] = useState<any[]>(() => uvs.map((u:any)=>({ ...u })));
+  const [ecoleDetailsItems, setEcoleDetailsItems] = useState<any[]>(() => ecoles.map((e:any)=>({ ...e })));
+
+  // Generic dialog for simple add/edit
+  const [simpleOpen, setSimpleOpen] = useState(false);
+  const [simpleTable, setSimpleTable] = useState<string | null>(null);
+  const [simpleMode, setSimpleMode] = useState<"new" | "edit">("new");
+  const [simpleDraft, setSimpleDraft] = useState<{ code: string; libelle: string; ordre: number }>({ code: "", libelle: "", ordre: 1 });
+
+  // Specialized edit dialogs (UV, École)
+  const [uvEditOpen, setUvEditOpen] = useState(false);
+  const [uvEditingCode, setUvEditingCode] = useState<string | null>(null);
+  const [uvDraft, setUvDraft] = useState<any>({ code: "", libelle: "", description: "", presentationEcrite: "", lienTeaserUV: "", coefficient: 0, eliminatoire: "N", noteValidation: 0, ordre: 1 });
+
+  const [ecoleEditOpen, setEcoleEditOpen] = useState(false);
+  const [ecoleEditingCode, setEcoleEditingCode] = useState<string | null>(null);
+  const [ecoleDraft, setEcoleDraft] = useState<any>({ code: "", nom: "", contacts: "", password: "", etat: "actif", ordre: 1 });
+
+  const getSimpleState = (key: string): { items: any[]; setItems: (fn: any) => void; title: string } => {
+    switch (key) {
+      case "fonctions": return { items: fonctionsItems, setItems: setFonctionsItems, title: "Fonctions" };
+      case "profils": return { items: profilsItems, setItems: setProfilsItems, title: "Profils" };
+      case "statutsContenu": return { items: statutsItems, setItems: setStatutsItems, title: "Statuts Contenu" };
+      case "typesQuiz": return { items: typesQuizItems, setItems: setTypesQuizItems, title: "Types Quiz" };
+      case "modesPaiement": return { items: modesPaiementItems, setItems: setModesPaiementItems, title: "Modes Paiement" };
+      case "typesRessourcePedagogique": return { items: typesRessourceItems, setItems: setTypesRessourceItems, title: "Types Ressource Pédagogique" };
+      case "ecoles": return { items: ecolesSimpleItems, setItems: setEcolesSimpleItems, title: "Écoles" };
+      case "uvs": return { items: uvsSimpleItems, setItems: setUvsSimpleItems, title: "UV" };
+      default: return { items: [], setItems: ()=>{}, title: key } as any;
+    }
+  };
+
+  const openNewSimple = (key: string) => {
+    setSimpleTable(key);
+    setSimpleMode("new");
+    setSimpleDraft({ code: "", libelle: "", ordre: 1 });
+    setSimpleOpen(true);
+  };
+  const openEditSimple = (key: string, item: any) => {
+    if (key === "uvs") {
+      const found = uvDetailsItems.find((u:any) => u.code === item.code);
+      if (!found) return;
+      setUvEditingCode(found.code);
+      setUvDraft({ ...found });
+      setUvEditOpen(true);
+      return;
+    }
+    if (key === "ecoles") {
+      const found = ecoleDetailsItems.find((e:any) => e.code === item.code);
+      if (!found) return;
+      setEcoleEditingCode(found.code);
+      setEcoleDraft({ ...found });
+      setEcoleEditOpen(true);
+      return;
+    }
+    setSimpleTable(key);
+    setSimpleMode("edit");
+    setSimpleDraft({ code: item.code, libelle: item.libelle, ordre: Number(item.ordre) || 0 });
+    setSimpleOpen(true);
+  };
+  const confirmSimple = () => {
+    if (!simpleTable) return;
+    const { items, setItems } = getSimpleState(simpleTable);
+    if (!simpleDraft.code.trim() || !simpleDraft.libelle.trim()) return;
+    if (simpleMode === "new") {
+      if (items.some((x:any) => x.code.toLowerCase() === simpleDraft.code.trim().toLowerCase())) return;
+      setItems((prev:any[]) => [...prev, { code: simpleDraft.code.trim(), libelle: simpleDraft.libelle.trim(), ordre: Number(simpleDraft.ordre) || 0 }].sort((a:any,b:any)=>a.ordre-b.ordre));
+    } else {
+      setItems((prev:any[]) => prev.map((x:any) => x.code === simpleDraft.code ? { ...x, libelle: simpleDraft.libelle.trim(), ordre: Number(simpleDraft.ordre) || 0 } : (x.code.toLowerCase() === simpleDraft.code.toLowerCase() ? { ...x, libelle: simpleDraft.libelle.trim(), ordre: Number(simpleDraft.ordre) || 0 } : x)).sort((a:any,b:any)=>a.ordre-b.ordre));
+    }
+    setSimpleOpen(false);
+  };
+  const deleteSimple = (key: string, code: string) => {
+    if (!window.confirm("Confirmer la suppression ?")) return;
+    const { setItems } = getSimpleState(key);
+    setItems((prev:any[]) => prev.filter((x:any) => x.code !== code));
+  };
+
+  const confirmUvEdit = () => {
+    if (!uvEditingCode) return;
+    if (!uvDraft.code.trim() || !uvDraft.libelle.trim()) return;
+    // Update details
+    setUvDetailsItems(prev => prev.map((u:any) => u.code === uvEditingCode ? {
+      ...u,
+      code: uvDraft.code.trim(),
+      libelle: uvDraft.libelle.trim(),
+      description: uvDraft.description || "",
+      presentationEcrite: uvDraft.presentationEcrite || "",
+      lienTeaserUV: uvDraft.lienTeaserUV || "",
+      coefficient: Number(uvDraft.coefficient) || 0,
+      eliminatoire: uvDraft.eliminatoire,
+      noteValidation: Number(uvDraft.noteValidation) || 0,
+      ordre: Number(uvDraft.ordre) || 0,
+    } : u));
+    // Update simple list
+    setUvsSimpleItems(prev => prev.map((u:any) => u.code === uvEditingCode ? { code: uvDraft.code.trim(), libelle: uvDraft.libelle.trim(), ordre: Number(uvDraft.ordre) || 0 } : u).sort((a:any,b:any)=>a.ordre-b.ordre));
+    if (selectedUvCode === uvEditingCode) setSelectedUvCode(uvDraft.code.trim());
+    setUvEditOpen(false);
+  };
+
+  const confirmEcoleEdit = () => {
+    if (!ecoleEditingCode) return;
+    if (!ecoleDraft.code.trim() || !ecoleDraft.nom.trim()) return;
+    setEcoleDetailsItems(prev => prev.map((e:any) => e.code === ecoleEditingCode ? {
+      ...e,
+      code: ecoleDraft.code.trim(),
+      nom: ecoleDraft.nom.trim(),
+      contacts: ecoleDraft.contacts || "",
+      password: ecoleDraft.password || "",
+      etat: ecoleDraft.etat || "actif",
+      ordre: Number(ecoleDraft.ordre) || 0,
+    } : e));
+    setEcolesSimpleItems(prev => prev.map((e:any) => e.code === ecoleEditingCode ? { code: ecoleDraft.code.trim(), libelle: ecoleDraft.nom.trim(), ordre: Number(ecoleDraft.ordre) || 0 } : e).sort((a:any,b:any)=>a.ordre-b.ordre));
+    setEcoleEditOpen(false);
+  };
 
   const resetDrilldown = () => {
     setSelectedThemeCode(null);
@@ -287,69 +414,102 @@ export default function AdminDashboard() {
               {selectedRef && (
                 <div className="mt-8">
                   {selectedRef === "fonctions" && (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Code</TableHead>
-                          <TableHead>Libellé</TableHead>
-                          <TableHead>Ordre</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {fonctions.map((f) => (
-                          <TableRow key={f.code}>
-                            <TableCell>{f.code}</TableCell>
-                            <TableCell>{f.libelle}</TableCell>
-                            <TableCell>{f.ordre}</TableCell>
+                    <div>
+                      <div className="mb-3 flex items-center justify-between rounded bg-cyan-500/20 px-3 py-2">
+                        <h3 className="font-semibold">Liste des Fonctions</h3>
+                        <Button size="sm" className="bg-gradient-primary" onClick={()=>openNewSimple("fonctions")}>Nouveau</Button>
+                      </div>
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Code</TableHead>
+                            <TableHead>Libellé</TableHead>
+                            <TableHead>Ordre</TableHead>
+                            <TableHead>Actions</TableHead>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                      <TableCaption>Fonctions (Code, Libellé, Ordre)</TableCaption>
-                    </Table>
+                        </TableHeader>
+                        <TableBody>
+                          {fonctionsItems.map((f) => (
+                            <TableRow key={f.code}>
+                              <TableCell>{f.code}</TableCell>
+                              <TableCell>{f.libelle}</TableCell>
+                              <TableCell>{f.ordre}</TableCell>
+                              <TableCell className="space-x-2">
+                                <Button size="sm" variant="link" onClick={()=>openEditSimple("fonctions", f)}>Modifier</Button>
+                                <Button size="sm" variant="link" className="text-red-600" onClick={()=>deleteSimple("fonctions", f.code)}>Supprimer</Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                        <TableCaption>Fonctions (Code, Libellé, Ordre)</TableCaption>
+                      </Table>
+                    </div>
                   )}
 
                   {selectedRef === "statutsContenu" && (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Code</TableHead>
-                          <TableHead>Libellé</TableHead>
-                          <TableHead>Ordre</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {statutsContenu.map((s) => (
-                          <TableRow key={s.code}>
-                            <TableCell>{s.code}</TableCell>
-                            <TableCell>{s.libelle}</TableCell>
-                            <TableCell>{s.ordre}</TableCell>
+                    <div>
+                      <div className="mb-3 flex items-center justify-between rounded bg-cyan-500/20 px-3 py-2">
+                        <h3 className="font-semibold">Liste des Statuts de contenu</h3>
+                        <Button size="sm" className="bg-gradient-primary" onClick={()=>openNewSimple("statutsContenu")}>Nouveau</Button>
+                      </div>
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Code</TableHead>
+                            <TableHead>Libellé</TableHead>
+                            <TableHead>Ordre</TableHead>
+                            <TableHead>Actions</TableHead>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                      <TableCaption>Statuts contenu (Code, Libellé, Ordre)</TableCaption>
-                    </Table>
+                        </TableHeader>
+                        <TableBody>
+                          {statutsItems.map((s) => (
+                            <TableRow key={s.code}>
+                              <TableCell>{s.code}</TableCell>
+                              <TableCell>{s.libelle}</TableCell>
+                              <TableCell>{s.ordre}</TableCell>
+                              <TableCell className="space-x-2">
+                                <Button size="sm" variant="link" onClick={()=>openEditSimple("statutsContenu", s)}>Modifier</Button>
+                                <Button size="sm" variant="link" className="text-red-600" onClick={()=>deleteSimple("statutsContenu", s.code)}>Supprimer</Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                        <TableCaption>Statuts contenu (Code, Libellé, Ordre)</TableCaption>
+                      </Table>
+                    </div>
                   )}
 
                   {selectedRef === "profils" && (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Code</TableHead>
-                          <TableHead>Libellé</TableHead>
-                          <TableHead>Ordre</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {profils.map((p) => (
-                          <TableRow key={p.code}>
-                            <TableCell>{p.code}</TableCell>
-                            <TableCell>{p.libelle}</TableCell>
-                            <TableCell>{p.ordre}</TableCell>
+                    <div>
+                      <div className="mb-3 flex items-center justify-between rounded bg-cyan-500/20 px-3 py-2">
+                        <h3 className="font-semibold">Liste des Profils</h3>
+                        <Button size="sm" className="bg-gradient-primary" onClick={()=>openNewSimple("profils")}>Nouveau</Button>
+                      </div>
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Code</TableHead>
+                            <TableHead>Libellé</TableHead>
+                            <TableHead>Ordre</TableHead>
+                            <TableHead>Actions</TableHead>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                      <TableCaption>Profils (Code, Libellé, Ordre)</TableCaption>
-                    </Table>
+                        </TableHeader>
+                        <TableBody>
+                          {profilsItems.map((p) => (
+                            <TableRow key={p.code}>
+                              <TableCell>{p.code}</TableCell>
+                              <TableCell>{p.libelle}</TableCell>
+                              <TableCell>{p.ordre}</TableCell>
+                              <TableCell className="space-x-2">
+                                <Button size="sm" variant="link" onClick={()=>openEditSimple("profils", p)}>Modifier</Button>
+                                <Button size="sm" variant="link" className="text-red-600" onClick={()=>deleteSimple("profils", p.code)}>Supprimer</Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                        <TableCaption>Profils (Code, Libellé, Ordre)</TableCaption>
+                      </Table>
+                    </div>
                   )}
 
                   {selectedRef === "themes" && (
@@ -474,131 +634,168 @@ export default function AdminDashboard() {
                   )}
 
                   {selectedRef === "typesRessourcePedagogique" && (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Code</TableHead>
-                          <TableHead>Libellé</TableHead>
-                          <TableHead>Ordre</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {typesRessourcePedagogique.map((t) => (
-                          <TableRow key={t.code}>
-                            <TableCell>{t.code}</TableCell>
-                            <TableCell>{t.libelle}</TableCell>
-                            <TableCell>{t.ordre}</TableCell>
+                    <div>
+                      <div className="mb-3 flex items-center justify-between rounded bg-cyan-500/20 px-3 py-2">
+                        <h3 className="font-semibold">Liste des Types ressource pédagogique</h3>
+                        <Button size="sm" className="bg-gradient-primary" onClick={()=>openNewSimple("typesRessourcePedagogique")}>Nouveau</Button>
+                      </div>
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Code</TableHead>
+                            <TableHead>Libellé</TableHead>
+                            <TableHead>Ordre</TableHead>
+                            <TableHead>Actions</TableHead>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                      <TableCaption>Types ressource pédagogique</TableCaption>
-                    </Table>
+                        </TableHeader>
+                        <TableBody>
+                          {typesRessourceItems.map((t) => (
+                            <TableRow key={t.code}>
+                              <TableCell>{t.code}</TableCell>
+                              <TableCell>{t.libelle}</TableCell>
+                              <TableCell>{t.ordre}</TableCell>
+                              <TableCell className="space-x-2">
+                                <Button size="sm" variant="link" onClick={()=>openEditSimple("typesRessourcePedagogique", t)}>Modifier</Button>
+                                <Button size="sm" variant="link" className="text-red-600" onClick={()=>deleteSimple("typesRessourcePedagogique", t.code)}>Supprimer</Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                        <TableCaption>Types ressource pédagogique</TableCaption>
+                      </Table>
+                    </div>
                   )}
 
                   {selectedRef === "typesQuiz" && (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Code</TableHead>
-                          <TableHead>Libellé</TableHead>
-                          <TableHead>Ordre</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {typesQuiz.map((tq) => (
-                          <TableRow key={tq.code}>
-                            <TableCell>{tq.code}</TableCell>
-                            <TableCell>{tq.libelle}</TableCell>
-                            <TableCell>{tq.ordre}</TableCell>
+                    <div>
+                      <div className="mb-3 flex items-center justify-between rounded bg-cyan-500/20 px-3 py-2">
+                        <h3 className="font-semibold">Liste des Types de quiz</h3>
+                        <Button size="sm" className="bg-gradient-primary" onClick={()=>openNewSimple("typesQuiz")}>Nouveau</Button>
+                      </div>
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Code</TableHead>
+                            <TableHead>Libellé</TableHead>
+                            <TableHead>Ordre</TableHead>
+                            <TableHead>Actions</TableHead>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                      <TableCaption>Types de Quiz</TableCaption>
-                    </Table>
+                        </TableHeader>
+                        <TableBody>
+                          {typesQuizItems.map((tq) => (
+                            <TableRow key={tq.code}>
+                              <TableCell>{tq.code}</TableCell>
+                              <TableCell>{tq.libelle}</TableCell>
+                              <TableCell>{tq.ordre}</TableCell>
+                              <TableCell className="space-x-2">
+                                <Button size="sm" variant="link" onClick={()=>openEditSimple("typesQuiz", tq)}>Modifier</Button>
+                                <Button size="sm" variant="link" className="text-red-600" onClick={()=>deleteSimple("typesQuiz", tq.code)}>Supprimer</Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                        <TableCaption>Types de Quiz</TableCaption>
+                      </Table>
+                    </div>
                   )}
 
                   {selectedRef === "modesPaiement" && (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Code</TableHead>
-                          <TableHead>Libellé</TableHead>
-                          <TableHead>Ordre</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {modesPaiement.map((m) => (
-                          <TableRow key={m.code}>
-                            <TableCell>{m.code}</TableCell>
-                            <TableCell>{m.libelle}</TableCell>
-                            <TableCell>{m.ordre}</TableCell>
+                    <div>
+                      <div className="mb-3 flex items-center justify-between rounded bg-cyan-500/20 px-3 py-2">
+                        <h3 className="font-semibold">Liste des Modes de paiement</h3>
+                        <Button size="sm" className="bg-gradient-primary" onClick={()=>openNewSimple("modesPaiement")}>Nouveau</Button>
+                      </div>
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Code</TableHead>
+                            <TableHead>Libellé</TableHead>
+                            <TableHead>Ordre</TableHead>
+                            <TableHead>Actions</TableHead>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                      <TableCaption>Modes de paiement</TableCaption>
-                    </Table>
+                        </TableHeader>
+                        <TableBody>
+                          {modesPaiementItems.map((m) => (
+                            <TableRow key={m.code}>
+                              <TableCell>{m.code}</TableCell>
+                              <TableCell>{m.libelle}</TableCell>
+                              <TableCell>{m.ordre}</TableCell>
+                              <TableCell className="space-x-2">
+                                <Button size="sm" variant="link" onClick={()=>openEditSimple("modesPaiement", m)}>Modifier</Button>
+                                <Button size="sm" variant="link" className="text-red-600" onClick={()=>deleteSimple("modesPaiement", m.code)}>Supprimer</Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                        <TableCaption>Modes de paiement</TableCaption>
+                      </Table>
+                    </div>
                   )}
 
                   {selectedRef === "ecoles" && (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Code</TableHead>
-                          <TableHead>Nom</TableHead>
-                          <TableHead>Contacts</TableHead>
-                          <TableHead>Password</TableHead>
-                          <TableHead>État</TableHead>
-                          <TableHead>Ordre</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {ecoles.map((e) => (
-                          <TableRow key={e.code}>
-                            <TableCell>{e.code}</TableCell>
-                            <TableCell>{e.nom}</TableCell>
-                            <TableCell>{e.contacts}</TableCell>
-                            <TableCell>{e.password}</TableCell>
-                            <TableCell className="capitalize">{e.etat}</TableCell>
-                            <TableCell>{e.ordre}</TableCell>
+                    <div>
+                      <div className="mb-3 flex items-center justify-between rounded bg-cyan-500/20 px-3 py-2">
+                        <h3 className="font-semibold">Liste des Écoles</h3>
+                        <Button size="sm" className="bg-gradient-primary" onClick={()=>openNewSimple("ecoles")}>Nouveau</Button>
+                      </div>
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Code</TableHead>
+                            <TableHead>Libellé</TableHead>
+                            <TableHead>Ordre</TableHead>
+                            <TableHead>Actions</TableHead>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                      <TableCaption>Écoles</TableCaption>
-                    </Table>
+                        </TableHeader>
+                        <TableBody>
+                          {ecolesSimpleItems.map((e) => (
+                            <TableRow key={e.code}>
+                              <TableCell>{e.code}</TableCell>
+                              <TableCell>{e.libelle}</TableCell>
+                              <TableCell>{e.ordre}</TableCell>
+                              <TableCell className="space-x-2">
+                                <Button size="sm" variant="link" onClick={()=>openEditSimple("ecoles", e)}>Modifier</Button>
+                                <Button size="sm" variant="link" className="text-red-600" onClick={()=>deleteSimple("ecoles", e.code)}>Supprimer</Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                        <TableCaption>Écoles (Code, Libellé, Ordre)</TableCaption>
+                      </Table>
+                    </div>
                   )}
 
                   {selectedRef === "uvs" && (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Code</TableHead>
-                          <TableHead>Libellé</TableHead>
-                          <TableHead>Description</TableHead>
-                          <TableHead>Présentation</TableHead>
-                          <TableHead>Teaser</TableHead>
-                          <TableHead>Coef</TableHead>
-                          <TableHead>Élim</TableHead>
-                          <TableHead>Note val.</TableHead>
-                          <TableHead>Ordre</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {uvs.map((u) => (
-                          <TableRow key={u.code} className="cursor-pointer" onClick={() => setSelectedUvCode(u.code)}>
-                            <TableCell>{u.code}</TableCell>
-                            <TableCell>{u.libelle}</TableCell>
-                            <TableCell>{u.description}</TableCell>
-                            <TableCell>{u.presentationEcrite}</TableCell>
-                            <TableCell>{u.lienTeaserUV}</TableCell>
-                            <TableCell>{u.coefficient}</TableCell>
-                            <TableCell>{u.eliminatoire}</TableCell>
-                            <TableCell>{u.noteValidation}</TableCell>
-                            <TableCell>{u.ordre}</TableCell>
+                    <div>
+                      <div className="mb-3 flex items-center justify-between rounded bg-primary/20 px-3 py-2">
+                        <h3 className="font-semibold">Liste des UV</h3>
+                        <Button size="sm" className="bg-gradient-primary" onClick={()=>openNewSimple("uvs")}>Nouveau</Button>
+                      </div>
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Code</TableHead>
+                            <TableHead>Libellé</TableHead>
+                            <TableHead>Ordre</TableHead>
+                            <TableHead>Actions</TableHead>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                      <TableCaption>UV (Code, Libellé, description, présentation, teaser, coefficient, éliminatoire, note validation, ordre)</TableCaption>
-                    </Table>
+                        </TableHeader>
+                        <TableBody>
+                          {uvsSimpleItems.map((u) => (
+                            <TableRow key={u.code} className="cursor-pointer" onClick={() => setSelectedUvCode(u.code)}>
+                              <TableCell>{u.code}</TableCell>
+                              <TableCell>{u.libelle}</TableCell>
+                              <TableCell>{u.ordre}</TableCell>
+                              <TableCell className="space-x-2" onClick={(e)=>e.stopPropagation()}>
+                                <Button size="sm" variant="link" onClick={()=>openEditSimple("uvs", u)}>Modifier</Button>
+                                <Button size="sm" variant="link" className="text-red-600" onClick={()=>deleteSimple("uvs", u.code)}>Supprimer</Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                        <TableCaption>UV (Code, Libellé, Ordre)</TableCaption>
+                      </Table>
+                    </div>
                   )}
 
                   {selectedRef === "uvs" && (
@@ -650,6 +847,135 @@ export default function AdminDashboard() {
                   )}
                 </div>
               )}
+              {/* Simple Add/Edit dialog */}
+              <Dialog open={simpleOpen} onOpenChange={setSimpleOpen}>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>{simpleMode === "new" ? "Nouveau" : "Modifier"} {simpleTable ? getSimpleState(simpleTable).title : ""}</DialogTitle>
+                  </DialogHeader>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-sm font-medium">Code</label>
+                      <Input value={simpleDraft.code} onChange={(e)=>setSimpleDraft(prev=>({ ...prev, code: e.target.value }))} disabled={simpleMode==='edit'} />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-sm font-medium">Libellé</label>
+                      <Input value={simpleDraft.libelle} onChange={(e)=>setSimpleDraft(prev=>({ ...prev, libelle: e.target.value }))} />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-sm font-medium">Ordre</label>
+                      <Input type="number" value={simpleDraft.ordre} onChange={(e)=>setSimpleDraft(prev=>({ ...prev, ordre: Number(e.target.value)||0 }))} />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={()=>setSimpleOpen(false)}>Annuler</Button>
+                    <Button className="bg-gradient-primary" onClick={confirmSimple}>Enregistrer</Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+
+              {/* UV Edit Dialog */}
+              <Dialog open={uvEditOpen} onOpenChange={setUvEditOpen}>
+                <DialogContent className="max-w-3xl">
+                  <DialogHeader>
+                    <DialogTitle>Modifier UV</DialogTitle>
+                  </DialogHeader>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-sm font-medium">Code</label>
+                      <Input value={uvDraft.code} onChange={(e)=>setUvDraft((p:any)=>({ ...p, code: e.target.value }))} />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-sm font-medium">Libellé</label>
+                      <Input value={uvDraft.libelle} onChange={(e)=>setUvDraft((p:any)=>({ ...p, libelle: e.target.value }))} />
+                    </div>
+                    <div className="space-y-1 md:col-span-2">
+                      <label className="text-sm font-medium">Description</label>
+                      <Input value={uvDraft.description} onChange={(e)=>setUvDraft((p:any)=>({ ...p, description: e.target.value }))} />
+                    </div>
+                    <div className="space-y-1 md:col-span-2">
+                      <label className="text-sm font-medium">Présentation écrite</label>
+                      <Input value={uvDraft.presentationEcrite} onChange={(e)=>setUvDraft((p:any)=>({ ...p, presentationEcrite: e.target.value }))} />
+                    </div>
+                    <div className="space-y-1 md:col-span-2">
+                      <label className="text-sm font-medium">Lien teaser UV</label>
+                      <Input value={uvDraft.lienTeaserUV} onChange={(e)=>setUvDraft((p:any)=>({ ...p, lienTeaserUV: e.target.value }))} />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-sm font-medium">Coefficient</label>
+                      <Input type="number" value={uvDraft.coefficient} onChange={(e)=>setUvDraft((p:any)=>({ ...p, coefficient: Number(e.target.value)||0 }))} />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-sm font-medium">Éliminatoire</label>
+                      <Select value={uvDraft.eliminatoire} onValueChange={(v)=>setUvDraft((p:any)=>({ ...p, eliminatoire: v }))}>
+                        <SelectTrigger><SelectValue placeholder="Choisir" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="O">O</SelectItem>
+                          <SelectItem value="N">N</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-sm font-medium">Note de validation</label>
+                      <Input type="number" value={uvDraft.noteValidation} onChange={(e)=>setUvDraft((p:any)=>({ ...p, noteValidation: Number(e.target.value)||0 }))} />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-sm font-medium">Ordre</label>
+                      <Input type="number" value={uvDraft.ordre} onChange={(e)=>setUvDraft((p:any)=>({ ...p, ordre: Number(e.target.value)||0 }))} />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={()=>setUvEditOpen(false)}>Annuler</Button>
+                    <Button className="bg-gradient-primary" onClick={confirmUvEdit}>Enregistrer</Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+
+              {/* École Edit Dialog */}
+              <Dialog open={ecoleEditOpen} onOpenChange={setEcoleEditOpen}>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Modifier École</DialogTitle>
+                  </DialogHeader>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-sm font-medium">Code</label>
+                      <Input value={ecoleDraft.code} onChange={(e)=>setEcoleDraft((p:any)=>({ ...p, code: e.target.value }))} />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-sm font-medium">Nom</label>
+                      <Input value={ecoleDraft.nom} onChange={(e)=>setEcoleDraft((p:any)=>({ ...p, nom: e.target.value }))} />
+                    </div>
+                    <div className="space-y-1 md:col-span-2">
+                      <label className="text-sm font-medium">Contacts</label>
+                      <Input value={ecoleDraft.contacts} onChange={(e)=>setEcoleDraft((p:any)=>({ ...p, contacts: e.target.value }))} />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-sm font-medium">Mot de passe</label>
+                      <Input value={ecoleDraft.password} onChange={(e)=>setEcoleDraft((p:any)=>({ ...p, password: e.target.value }))} />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-sm font-medium">État</label>
+                      <Select value={ecoleDraft.etat} onValueChange={(v)=>setEcoleDraft((p:any)=>({ ...p, etat: v }))}>
+                        <SelectTrigger><SelectValue placeholder="Choisir" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="actif">actif</SelectItem>
+                          <SelectItem value="sommeil">sommeil</SelectItem>
+                          <SelectItem value="inactif">inactif</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-sm font-medium">Ordre</label>
+                      <Input type="number" value={ecoleDraft.ordre} onChange={(e)=>setEcoleDraft((p:any)=>({ ...p, ordre: Number(e.target.value)||0 }))} />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={()=>setEcoleEditOpen(false)}>Annuler</Button>
+                    <Button className="bg-gradient-primary" onClick={confirmEcoleEdit}>Enregistrer</Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </CardContent>
           </Card>
 
