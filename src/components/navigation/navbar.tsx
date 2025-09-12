@@ -63,7 +63,7 @@ export function Navbar() {
               <div className="w-6 h-6 bg-gradient-primary rounded-full flex items-center justify-center">
                 <User className="h-4 w-4 text-white" />
               </div>
-                <span className="text-sm font-medium capitalize">{user.role === "student" ? "Apprenant" : user.role}</span>
+                <span className="text-sm font-medium capitalize">{user.role === "student" ? "Apprenant" : user.role === "teacher" ? "Enseignant" : user.role}</span>
                 <Button size="sm" variant="ghost" onClick={() => { logout(); navigate("/login"); }}>Déconnexion</Button>
             </div>
             ) : (
