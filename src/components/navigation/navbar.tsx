@@ -29,17 +29,28 @@ export function Navbar() {
           <div className="hidden md:flex items-center space-x-6">
             <Button variant="ghost" size="sm" onClick={() => navigate("/")}>Accueil</Button>
             <Button variant="ghost" size="sm" onClick={() => navigate("/formations")}>Formations</Button>
+            {user?.role === "admin" && (
+              <>
+                <Button variant="ghost" size="sm" onClick={() => navigate("/admin")}>Tableau de bord</Button>
+                <Button variant="ghost" size="sm" onClick={() => navigate("/admin/parametrage")}>Paramétrage</Button>
+              </>
+            )}
             {user?.role === "teacher" && (
               <>
+                <Button variant="ghost" size="sm" onClick={() => navigate("/teacher")}>Tableau de bord</Button>
                 <Button variant="ghost" size="sm" onClick={() => navigate("/teacher/courses")}>Cours</Button>
                 <Button variant="ghost" size="sm" onClick={() => navigate("/teacher/quizzes")}>Gestion des quiz</Button>
               </>
             )}
             {user?.role === "student" && (
-              <Button variant="ghost" size="sm" onClick={() => navigate("/student/quizzes")}>Quiz</Button>
+              <>
+                <Button variant="ghost" size="sm" onClick={() => navigate("/student")}>Tableau de bord</Button>
+                <Button variant="ghost" size="sm" onClick={() => navigate("/student/quizzes")}>Quiz</Button>
+              </>
             )}
             {user?.role === "client" && (
               <>
+                <Button variant="ghost" size="sm" onClick={() => navigate("/client")}>Tableau de bord</Button>
                 <Button variant="ghost" size="sm" onClick={() => navigate("/client/credits")}>Gestion des crédits</Button>
                 <Button variant="ghost" size="sm" onClick={() => navigate("/client/learners")}>Gestion des apprenants</Button>
               </>
@@ -63,8 +74,10 @@ export function Navbar() {
               <div className="w-6 h-6 bg-gradient-primary rounded-full flex items-center justify-center">
                 <User className="h-4 w-4 text-white" />
               </div>
-                <span className="text-sm font-medium capitalize">{user.role === "student" ? "Apprenant" : user.role === "teacher" ? "Enseignant" : user.role}</span>
-                <Button size="sm" variant="ghost" onClick={() => { logout(); navigate("/login"); }}>Déconnexion</Button>
+              <span className="ml-1 px-2 py-0.5 text-xs rounded-full text-white bg-gradient-to-r from-sky-600 to-emerald-600">
+                {user.role === 'student' ? 'Apprenant' : user.role === 'teacher' ? 'Enseignant' : user.role === 'client' ? 'Client' : 'Admin'}
+              </span>
+              <Button size="sm" variant="ghost" onClick={() => { logout(); navigate("/login"); }}>Déconnexion</Button>
             </div>
             ) : (
               <Button size="sm" className="bg-gradient-primary" onClick={() => navigate("/login")}>Se connecter</Button>
@@ -87,17 +100,28 @@ export function Navbar() {
             <div className="flex flex-col space-y-2">
               <Button variant="ghost" size="sm" className="justify-start" onClick={() => navigate("/")}>Accueil</Button>
               <Button variant="ghost" size="sm" className="justify-start" onClick={() => navigate("/formations")}>Formations</Button>
+              {user?.role === "admin" && (
+                <>
+                  <Button variant="ghost" size="sm" className="justify-start" onClick={() => navigate("/admin")}>Tableau de bord</Button>
+                  <Button variant="ghost" size="sm" className="justify-start" onClick={() => navigate("/admin/parametrage")}>Paramétrage</Button>
+                </>
+              )}
               {user?.role === "teacher" && (
                 <>
+                  <Button variant="ghost" size="sm" className="justify-start" onClick={() => navigate("/teacher")}>Tableau de bord</Button>
                   <Button variant="ghost" size="sm" className="justify-start" onClick={() => navigate("/teacher/courses")}>Cours</Button>
                   <Button variant="ghost" size="sm" className="justify-start" onClick={() => navigate("/teacher/quizzes")}>Gestion des quiz</Button>
                 </>
               )}
               {user?.role === "student" && (
-                <Button variant="ghost" size="sm" className="justify-start" onClick={() => navigate("/student/quizzes")}>Quiz</Button>
+                <>
+                  <Button variant="ghost" size="sm" className="justify-start" onClick={() => navigate("/student")}>Tableau de bord</Button>
+                  <Button variant="ghost" size="sm" className="justify-start" onClick={() => navigate("/student/quizzes")}>Quiz</Button>
+                </>
               )}
               {user?.role === "client" && (
                 <>
+                  <Button variant="ghost" size="sm" className="justify-start" onClick={() => navigate("/client")}>Tableau de bord</Button>
                   <Button variant="ghost" size="sm" className="justify-start" onClick={() => navigate("/client/credits")}>Gestion des crédits</Button>
                   <Button variant="ghost" size="sm" className="justify-start" onClick={() => navigate("/client/learners")}>Gestion des apprenants</Button>
                 </>

@@ -273,23 +273,23 @@ export default function TeacherQuizzes() {
                           className={o.isCorrect ? "bg-gradient-primary w-full" : "w-full"}
                           onClick={()=>updateOption(q.id, o.id, { isCorrect: !o.isCorrect })}
                         >
-                          {o.isCorrect ? "Bonne réponse" : "Marquer correct"}
-                        </Button>
-                      </div>
-                      <div className="md:col-span-2">
-                        <Input type="number" placeholder="Points" value={o.points} onChange={(e)=>updateOption(q.id, o.id, { points: Number(e.target.value)||0 })} />
-                      </div>
-                      <div className="md:col-span-1 flex justify-end">
-                        <Button variant="outline" onClick={()=>removeOption(q.id, o.id)}>Supprimer</Button>
-                      </div>
+                        {o.isCorrect ? "Bonne réponse" : "Marquer correct"}
+                      </Button>
                     </div>
-                  ))}
-                </div>
+                    <div className="md:col-span-2">
+                        <Input type="number" placeholder="Points" value={o.points} onChange={(e)=>updateOption(q.id, o.id, { points: Number(e.target.value)||0 })} />
+                    </div>
+                      <div className="md:col-span-1 flex justify-end">
+                      <Button variant="outline" onClick={()=>removeOption(q.id, o.id)}>Supprimer</Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
               ))}
               <div className="flex justify-end">
                 <Button className="bg-gradient-primary" onClick={saveQuestions}>Enregistrer</Button>
               </div>
-            </div>
+        </div>
           </DialogContent>
         </Dialog>
       </main>
