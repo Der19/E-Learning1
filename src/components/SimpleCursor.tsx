@@ -32,10 +32,10 @@ const SimpleCursor = () => {
       prev
         .map(point => ({
           ...point,
-          opacity: point.opacity * 0.85, // Fade plus lent
+          opacity: point.opacity * 0.80, // Fade plus rapide sur mobile
           life: point.life + 1
         }))
-        .filter(point => point.opacity > 0.1 && point.life < 25) // Durée plus longue
+        .filter(point => point.opacity > 0.15 && point.life < 20) // Durée plus courte
     );
   }, []);
 
@@ -68,11 +68,11 @@ const SimpleCursor = () => {
       setMousePos({ x: touch.clientX, y: touch.clientY });
       setIsVisible(true);
       
-      // Créer des points au touch
-      if (now - lastMouseTime.current > 30) {
+      // Créer des points moins fréquemment sur mobile
+      if (now - lastMouseTime.current > 100) { // Beaucoup moins fréquent
         lastMouseTime.current = now;
         const newPoint = createPoint(touch.clientX, touch.clientY);
-        setPoints(prev => [newPoint, ...prev].slice(-8));
+        setPoints(prev => [newPoint, ...prev].slice(-5)); // Moins de points sur mobile
       }
     }
   }, [createPoint]);
@@ -83,14 +83,14 @@ const SimpleCursor = () => {
       setMousePos({ x: touch.clientX, y: touch.clientY });
       setIsVisible(true);
       
-      // Explosion au touch
-      for (let i = 0; i < 6; i++) {
-        const angle = (i / 6) * Math.PI * 2;
-        const distance = 25;
+      // Explosion plus simple sur mobile
+      for (let i = 0; i < 3; i++) { // Moins de points
+        const angle = (i / 3) * Math.PI * 2;
+        const distance = 20; // Distance réduite
         const x = touch.clientX + Math.cos(angle) * distance;
         const y = touch.clientY + Math.sin(angle) * distance;
         const newPoint = createPoint(x, y);
-        setPoints(prev => [newPoint, ...prev].slice(-8));
+        setPoints(prev => [newPoint, ...prev].slice(-5)); // Moins de points max
       }
     }
   }, [createPoint]);

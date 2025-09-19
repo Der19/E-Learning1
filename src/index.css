@@ -312,6 +312,18 @@ All colors MUST be HSL.
     .simple-point {
       width: 12px !important;
       height: 12px !important;
+      animation: pulse-mobile 2s ease-in-out infinite; /* Animation plus lente */
+    }
+  }
+
+  @keyframes pulse-mobile {
+    0%, 100% { 
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 0.8;
+    }
+    50% { 
+      transform: translate(-50%, -50%) scale(1.1);
+      opacity: 1;
     }
   }
 
