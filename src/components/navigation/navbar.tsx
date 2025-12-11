@@ -100,12 +100,74 @@ export function Navbar() {
 
           {/* Right section */}
           <div className="flex items-center space-x-3">
-            <Button variant="ghost" size="sm" className="relative">
-              <Bell className="h-4 w-4" />
-              <Badge className="absolute -top-1 -right-1 h-4 w-4 text-xs p-0 bg-warning">
-                3
-              </Badge>
-            </Button>
+            <Popover open={notificationsOpen} onOpenChange={setNotificationsOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="sm" className="relative">
+                  <Bell className="h-4 w-4" />
+                  <Badge className="absolute -top-1 -right-1 h-4 w-4 text-xs p-0 bg-warning">
+                    {upcomingLiveCourses.length}
+                  </Badge>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-0" align="end">
+                <Card className="border-0 shadow-lg">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm flex items-center">
+                      <Video className="h-4 w-4 mr-2" />
+                      Prochains cours en live
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3 max-h-96 overflow-y-auto">
+                    {upcomingLiveCourses.length === 0 ? (
+                      <p className="text-sm text-muted-foreground text-center py-4">
+                        Aucun cours en live prévu
+                      </p>
+                    ) : (
+                      upcomingLiveCourses.map((course) => (
+                        <div
+                          key={course.id}
+                          className="p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                          onClick={() => {
+                            navigate("/live-courses");
+                            setNotificationsOpen(false);
+                          }}
+                        >
+                          <div className="flex items-start justify-between mb-2">
+                            <h4 className="text-sm font-semibold line-clamp-2">{course.titre}</h4>
+                            <Badge variant="outline" className="text-xs ml-2">À venir</Badge>
+                          </div>
+                          <div className="space-y-1 text-xs text-muted-foreground">
+                            <div className="flex items-center gap-2">
+                              <Calendar className="h-3 w-3" />
+                              <span>{formatDate(course.date)}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Clock className="h-3 w-3" />
+                              <span>{course.heure} - Durée: {course.duree}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <User className="h-3 w-3" />
+                              <span>{course.formateur}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full mt-2"
+                      onClick={() => {
+                        navigate("/live-courses");
+                        setNotificationsOpen(false);
+                      }}
+                    >
+                      Voir tous les cours en live
+                    </Button>
+                  </CardContent>
+                </Card>
+              </PopoverContent>
+            </Popover>
             
             {user ? (
             <div className="hidden md:flex items-center space-x-2 bg-white/50 rounded-full px-3 py-1">
