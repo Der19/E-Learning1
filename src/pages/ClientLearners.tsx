@@ -26,9 +26,11 @@ export default function ClientLearners() {
   const displayed = useMemo(() => learners.filter(l => !filter || l.code.toLowerCase().includes(filter.toLowerCase()) || l.name.toLowerCase().includes(filter.toLowerCase())), [learners, filter]);
 
   const add = () => {
-    if (!draft.code.trim() || !draft.name.trim() || !draft.password.trim()) return;
+    if (!draft.code.trim() || !draft.name.trim()) return;
     if (learners.some(l => l.code.toLowerCase() === draft.code.trim().toLowerCase())) return;
-    setLearners(prev => [...prev, { ...draft, code: draft.code.trim() }]);
+    // Générer un mot de passe par défaut basé sur le code
+    const defaultPassword = draft.code.trim().toLowerCase() + "123";
+    setLearners(prev => [...prev, { ...draft, code: draft.code.trim(), password: defaultPassword }]);
     setDraft({ code: "", name: "", password: "", credits: 0 });
     toast({ title: "Apprenant créé" });
   };
@@ -84,10 +86,9 @@ export default function ClientLearners() {
               <Input placeholder="Filtrer (code/nom)" value={filter} onChange={(e)=>setFilter(e.target.value)} className="max-w-sm" />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <Input placeholder="Code" value={draft.code} onChange={(e)=>setDraft(prev=>({ ...prev, code: e.target.value }))} />
               <Input placeholder="Nom" value={draft.name} onChange={(e)=>setDraft(prev=>({ ...prev, name: e.target.value }))} />
-              <Input placeholder="Mot de passe" value={draft.password} onChange={(e)=>setDraft(prev=>({ ...prev, password: e.target.value }))} />
               <div className="flex justify-end">
                 <Button className="bg-gradient-primary" onClick={add}>Créer</Button>
               </div>
@@ -98,7 +99,6 @@ export default function ClientLearners() {
                 <TableRow>
                   <TableHead>Code</TableHead>
                   <TableHead>Nom</TableHead>
-                  <TableHead>Mot de passe</TableHead>
                   <TableHead>Crédits</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
@@ -108,7 +108,6 @@ export default function ClientLearners() {
                   <TableRow key={l.code}>
                     <TableCell>{l.code}</TableCell>
                     <TableCell>{l.name}</TableCell>
-                    <TableCell>{l.password}</TableCell>
                     <TableCell>{l.credits}</TableCell>
                     <TableCell className="space-x-2">
                       <Button size="sm" variant="outline" onClick={()=>openOffer(l)}>Offrir crédits</Button>
@@ -143,7 +142,7 @@ export default function ClientLearners() {
                 <DialogHeader>
                   <DialogTitle>Modifier l'apprenant</DialogTitle>
                 </DialogHeader>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <label className="text-sm font-medium">Code</label>
                     <Input value={editDraft.code} onChange={(e)=>setEditDraft(prev=>({ ...prev, code: e.target.value }))} />
@@ -151,10 +150,6 @@ export default function ClientLearners() {
                   <div className="space-y-1">
                     <label className="text-sm font-medium">Nom</label>
                     <Input value={editDraft.name} onChange={(e)=>setEditDraft(prev=>({ ...prev, name: e.target.value }))} />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-sm font-medium">Mot de passe</label>
-                    <Input value={editDraft.password} onChange={(e)=>setEditDraft(prev=>({ ...prev, password: e.target.value }))} />
                   </div>
                 </div>
                 <DialogFooter>
