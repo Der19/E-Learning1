@@ -1,14 +1,49 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { GraduationCap, Bell, User, Menu } from "lucide-react";
+import { GraduationCap, Bell, User, Menu, Video, Clock, Calendar } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCurrentUser, logout } from "@/lib/auth";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+// Données simulées des prochains cours en live
+const upcomingLiveCourses = [
+  {
+    id: "LIVE-001",
+    titre: "JavaScript Fondamentaux - Session Live",
+    formateur: "Martin Dubois",
+    date: "2024-12-15",
+    heure: "14:00",
+    duree: "2h",
+  },
+  {
+    id: "LIVE-004",
+    titre: "SQL Avancé - Session Live",
+    formateur: "Sarah Johnson",
+    date: "2024-12-18",
+    heure: "09:00",
+    duree: "2h",
+  },
+];
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const navigate = useNavigate();
   const user = getCurrentUser();
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("fr-FR", { 
+      day: "numeric", 
+      month: "short"
+    });
+  };
 
   return (
     <nav className="sticky top-0 z-50 backdrop-blur-md bg-white/80 border-b border-white/20">
@@ -57,6 +92,7 @@ export function Navbar() {
                 <Button variant="ghost" size="sm" onClick={() => navigate("/client/learners")}>Gestion des apprenants</Button>
               </>
             )}
+            <Button variant="ghost" size="sm" onClick={() => navigate("/live-courses")}>Cours en Live</Button>
             {!user || (user.role !== "formateur" && user.role !== "student" && user.role !== "client") ? (
               <Button variant="ghost" size="sm" onClick={() => navigate("/support")}>Support</Button>
             ) : null}
@@ -130,6 +166,7 @@ export function Navbar() {
                   <Button variant="ghost" size="sm" className="justify-start" onClick={() => navigate("/client/learners")}>Gestion des apprenants</Button>
                 </>
               )}
+              <Button variant="ghost" size="sm" className="justify-start" onClick={() => navigate("/live-courses")}>Cours en Live</Button>
               {!user || (user.role !== "formateur" && user.role !== "student" && user.role !== "client") ? (
                 <Button variant="ghost" size="sm" className="justify-start" onClick={() => navigate("/support")}>Support</Button>
               ) : null}

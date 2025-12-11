@@ -24,6 +24,7 @@ import ClientLearners from "./pages/ClientLearners";
 import StudentQuizzesList from "./pages/StudentQuizzesList";
 import StudentQuizTake from "./pages/StudentQuizTake";
 import StudentCourses from "./pages/StudentCourses";
+import LiveCourses from "./pages/LiveCourses";
 import Support from "./pages/Support";
 import StudentQuizResult from "./pages/StudentQuizResult";
 
@@ -39,6 +40,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
           <Route path="/formations" element={<Formations />} />
+          <Route path="/live-courses" element={<LiveCourses />} />
           <Route path="/support" element={<Support />} />
           <Route
             path="/admin"
