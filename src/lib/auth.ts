@@ -35,8 +35,8 @@ const USERS: UserRecord[] = [
     redirectPath: "/student",
   },
   {
-    email: "client@edu.local",
-    password: "client123",
+    email: "collectivitélocale@edu.local",
+    password: "collectivitélocale123",
     role: "client",
     redirectPath: "/client",
   },

@@ -32,7 +32,7 @@ export default function AdminUsers() {
     { code: "USR001", email: "admin@edu.local", nom: "Administrateur Principal", password: "admin123", profil: "ADMIN", etat: "actif" },
     { code: "USR002", email: "formateur@edu.local", nom: "Martin Dubois", password: "formateur123", profil: "ENSEIGN", etat: "actif" },
     { code: "USR003", email: "student@edu.local", nom: "Fatou Ndiaye", password: "student123", profil: "APPREN", etat: "actif" },
-    { code: "USR004", email: "client@edu.local", nom: "École Supérieure", password: "client123", profil: "CLIENT", etat: "actif" },
+    { code: "USR004", email: "collectivitélocale@edu.local", nom: "École Supérieure", password: "collectivitélocale123", profil: "CLIENT", etat: "actif" },
   ]);
 
   const [filter, setFilter] = useState("");
