@@ -51,11 +51,8 @@ export function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center space-x-3">
-            <div className="relative bg-gradient-primary p-2.5 rounded-lg flex items-center justify-center">
-              <div className="relative flex flex-col items-center">
-                <GraduationCap className="h-5 w-5 text-white mb-0.5" />
-                <BookOpen className="h-3.5 w-3.5 text-white/90" />
-              </div>
+            <div className="bg-gradient-primary p-2 rounded-lg">
+              <GraduationCap className="h-6 w-6 text-white" />
             </div>
             <div>
               <h1 className="text-xl font-bold text-foreground">Kaay Diangu</h1>
