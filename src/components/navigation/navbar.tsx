@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { GraduationCap, Bell, User, Menu, Video, Clock, Calendar } from "lucide-react";
+import { GraduationCap, Bell, User, Menu, Video, Clock, Calendar, BookOpen } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCurrentUser, logout } from "@/lib/auth";
@@ -51,8 +51,11 @@ export function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center space-x-3">
-            <div className="bg-gradient-primary p-2 rounded-lg">
-              <GraduationCap className="h-6 w-6 text-white" />
+            <div className="relative bg-gradient-primary p-2 rounded-lg">
+              <div className="relative">
+                <GraduationCap className="h-5 w-5 text-white absolute -top-1 left-1/2 transform -translate-x-1/2" />
+                <BookOpen className="h-4 w-4 text-white/90 mt-2" />
+              </div>
             </div>
             <div>
               <h1 className="text-xl font-bold text-foreground">Kaay Diangu</h1>
