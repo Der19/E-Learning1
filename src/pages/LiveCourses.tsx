@@ -21,10 +21,10 @@ type LiveCourse = {
 export default function LiveCourses() {
   const [filter, setFilter] = useState<"all" | "a_venir" | "en_cours" | "termine">("all");
 
-  // Fonction pour créer un cours de test qui commence dans 10 minutes
+  // Fonction pour créer un cours de test qui commence dans 2 minutes
   const createTestLiveCourse = (): LiveCourse => {
     const now = new Date();
-    const testDate = new Date(now.getTime() + 10 * 60 * 1000); // 10 minutes à partir de maintenant
+    const testDate = new Date(now.getTime() + 2 * 60 * 1000); // 2 minutes pour test
     const dateStr = testDate.toISOString().split('T')[0];
     const heureStr = `${String(testDate.getHours()).padStart(2, '0')}:${String(testDate.getMinutes()).padStart(2, '0')}`;
     
@@ -37,7 +37,7 @@ export default function LiveCourses() {
       duree: "2h",
       lienLive: "https://meet.example.com/test-notification",
       statut: "a_venir",
-      description: "Ce cours est un test pour vérifier les notifications par email. Il commence dans 10 minutes.",
+      description: "Ce cours est un test pour vérifier les notifications par email. Il commence dans 2 minutes.",
     };
   };
 
