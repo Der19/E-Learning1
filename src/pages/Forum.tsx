@@ -399,8 +399,16 @@ export default function Forum() {
     }
   };
 
-  const categories = [
+  const allCategories = [
     "Toutes les catégories",
+    "Cours et Formations",
+    "Quiz et Évaluations",
+    "Cours en Live",
+    "Problèmes Techniques",
+    "Général",
+  ];
+
+  const topicCategories = [
     "Cours et Formations",
     "Quiz et Évaluations",
     "Cours en Live",
@@ -560,11 +568,22 @@ export default function Forum() {
                   />
                   <div>
                     <label className="text-sm font-medium mb-2 block">Catégorie (optionnel)</label>
-                    <Input
-                      placeholder="Ex: Cours et Formations, Quiz et Évaluations..."
+                    <Select
                       value={newTopic.category}
-                      onChange={(e) => setNewTopic({ ...newTopic, category: e.target.value })}
-                    />
+                      onValueChange={(value) => setNewTopic({ ...newTopic, category: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sélectionner une catégorie" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">Aucune catégorie</SelectItem>
+                        {topicCategories.map((cat) => (
+                          <SelectItem key={cat} value={cat}>
+                            {cat}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div>
                     <label className="text-sm font-medium mb-2 block">Contenu</label>
@@ -598,7 +617,7 @@ export default function Forum() {
             className="flex-1"
           />
           <div className="flex flex-wrap gap-2">
-            {categories.map((cat) => (
+            {allCategories.map((cat) => (
               <Button
                 key={cat}
                 variant={selectedCategory === cat ? "default" : "outline"}
