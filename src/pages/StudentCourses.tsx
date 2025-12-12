@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { BookOpen, Clock, User, Play, CheckCircle, XCircle, Search } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -34,8 +34,18 @@ export default function StudentCourses() {
   const [launchDialogOpen, setLaunchDialogOpen] = useState(false);
   const [creditsDisponibles] = useState(127); // Simulé - devrait venir du contexte utilisateur
 
-  // Données simulées des cours disponibles pour l'apprenant
-  const [studentCourses, setStudentCourses] = useState<StudentCourse[]>([
+  // Charger les cours depuis localStorage ou utiliser les données par défaut
+  const loadStudentCourses = (): StudentCourse[] => {
+    try {
+      const stored = localStorage.getItem("student:courses");
+      if (stored) {
+        return JSON.parse(stored);
+      }
+    } catch (error) {
+      console.error("Erreur lors du chargement des cours:", error);
+    }
+    // Données par défaut
+    return [
     {
       id: "1",
       code: "JS-BASICS",
@@ -99,7 +109,15 @@ export default function StudentCourses() {
       dateDebut: "2023-12-01",
       dateFin: "2024-01-10",
     },
-  ]);
+  ];
+  };
+
+  const [studentCourses, setStudentCourses] = useState<StudentCourse[]>(loadStudentCourses);
+
+  // Sauvegarder les cours dans localStorage à chaque modification
+  useEffect(() => {
+    localStorage.setItem("student:courses", JSON.stringify(studentCourses));
+  }, [studentCourses]);
 
   const filtered = useMemo(() => {
     return studentCourses.filter(c => {
