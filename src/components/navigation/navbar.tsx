@@ -76,6 +76,8 @@ export function Navbar() {
                 <Button variant="ghost" size="sm" onClick={() => navigate("/teacher")}>Tableau de bord</Button>
                 <Button variant="ghost" size="sm" onClick={() => navigate("/teacher/courses")}>Cours</Button>
                 <Button variant="ghost" size="sm" onClick={() => navigate("/teacher/quizzes")}>Gestion des quiz</Button>
+                <Button variant="ghost" size="sm" onClick={() => navigate("/forum")}>Forum</Button>
+                <Button variant="ghost" size="sm" onClick={() => navigate("/support")}>FAQ</Button>
               </>
             )}
             {user?.role === "student" && (
@@ -84,6 +86,7 @@ export function Navbar() {
                 <Button variant="ghost" size="sm" onClick={() => navigate("/student/courses")}>Mes Cours</Button>
                 <Button variant="ghost" size="sm" onClick={() => navigate("/live-courses")}>Cours en Live</Button>
                 <Button variant="ghost" size="sm" onClick={() => navigate("/student/quizzes")}>Quiz</Button>
+                <Button variant="ghost" size="sm" onClick={() => navigate("/forum")}>Forum</Button>
                 <Button variant="ghost" size="sm" onClick={() => navigate("/support")}>FAQ</Button>
               </>
             )}

@@ -26,6 +26,7 @@ import StudentQuizTake from "./pages/StudentQuizTake";
 import StudentCourses from "./pages/StudentCourses";
 import LiveCourses from "./pages/LiveCourses";
 import Support from "./pages/Support";
+import Forum from "./pages/Forum";
 import StudentQuizResult from "./pages/StudentQuizResult";
 
 const queryClient = new QueryClient();
@@ -42,6 +43,7 @@ const App = () => (
           <Route path="/formations" element={<Formations />} />
           <Route path="/live-courses" element={<LiveCourses />} />
           <Route path="/support" element={<Support />} />
+          <Route path="/forum" element={<Forum />} />
           <Route
             path="/admin"
             element={
