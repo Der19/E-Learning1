@@ -98,9 +98,6 @@ export function Navbar() {
                 <Button variant="ghost" size="sm" onClick={() => navigate("/support")}>FAQ</Button>
               </>
             )}
-            {user?.role === "formateur" && (
-              <Button variant="ghost" size="sm" onClick={() => navigate("/support")}>FAQ</Button>
-            )}
             {!user && (
               <Button variant="ghost" size="sm" onClick={() => navigate("/support")}>FAQ</Button>
             )}
