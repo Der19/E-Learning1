@@ -17,25 +17,6 @@ export function EmailNotificationsProvider() {
       return;
     }
 
-    // Fonction pour récupérer les cours de l'étudiant depuis localStorage
-    const getStudentCourses = () => {
-      try {
-        const stored = localStorage.getItem("student:courses");
-        if (stored) {
-          const courses = JSON.parse(stored);
-          return courses.map((c: any) => ({
-            id: c.id,
-            titre: c.titre,
-            dateFin: c.dateFin,
-            disponibilite: c.disponibilite,
-          }));
-        }
-      } catch (error) {
-        console.error("Erreur lors de la récupération des cours:", error);
-      }
-      return [];
-    };
-
     // Fonction pour récupérer les cours en live depuis localStorage
     const getLiveCourses = () => {
       try {
@@ -76,10 +57,7 @@ export function EmailNotificationsProvider() {
     };
 
     // Initialiser le système de notifications
-    const cleanup = initializeEmailNotifications(
-      getStudentCourses,
-      getLiveCourses
-    );
+    const cleanup = initializeEmailNotifications(getLiveCourses);
 
     return cleanup;
   }, []);
