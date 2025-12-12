@@ -2,6 +2,8 @@
 // Service de notifications par email
 // Utilise EmailJS pour envoyer des emails depuis le frontend
 
+import emailjs from '@emailjs/browser';
+
 interface StudentEmail {
   email: string;
   name?: string;
@@ -151,7 +153,8 @@ export async function checkLiveCourseReminders(
     const diffMinutes = Math.floor(diffMs / (1000 * 60));
 
     // Envoyer une notification si le cours commence dans 10 minutes (± 1 minute de tolérance)
-    if (diffMinutes >= 9 && diffMinutes <= 11) {
+    // Pour le test : détecte aussi les cours qui commencent dans 1-3 minutes
+    if ((diffMinutes >= 9 && diffMinutes <= 11) || (diffMinutes >= 1 && diffMinutes <= 3)) {
       const notificationKey = `live-${course.id}`;
       
       // Vérifier si on a déjà envoyé une notification pour ce cours
