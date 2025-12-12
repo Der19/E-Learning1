@@ -7,14 +7,6 @@ interface StudentEmail {
   name?: string;
 }
 
-interface CourseDeadline {
-  courseId: string;
-  courseTitle: string;
-  studentEmail: string;
-  deadline: string; // Date limite
-  daysRemaining: number;
-}
-
 interface LiveCourseReminder {
   courseId: string;
   courseTitle: string;
@@ -87,36 +79,6 @@ async function sendEmail(
     console.error("Erreur lors de l'envoi de l'email:", error);
     return false;
   }
-}
-
-/**
- * Envoie une notification pour un cours avec délai approchant
- */
-export async function sendCourseDeadlineNotification(
-  course: CourseDeadline
-): Promise<boolean> {
-  const subject = `⏰ Rappel : Délai du cours "${course.courseTitle}" approchant`;
-  const message = `
-Bonjour,
-
-Ceci est un rappel automatique concernant le cours "${course.courseTitle}".
-
-⚠️ Attention : Le délai pour terminer ce cours approche !
-- Il vous reste ${course.daysRemaining} jour${course.daysRemaining > 1 ? "s" : ""} avant la date limite
-- Date limite : ${new Date(course.deadline).toLocaleDateString("fr-FR", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  })}
-
-Nous vous encourageons à terminer ce cours dans les meilleurs délais.
-
-Cordialement,
-L'équipe Kaay Diangu
-  `.trim();
-
-  return await sendEmail(course.studentEmail, subject, message);
 }
 
 /**
